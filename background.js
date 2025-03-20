@@ -4,6 +4,19 @@
 let ruleGroups = [];
 let ruleGroupId = 1;
 let nextRuleId = 1000; // Start with a high ID to avoid conflicts
+let modifiedRequestCount = 0;
+
+// Update badge with current count
+function updateBadge() {
+  chrome.action.setBadgeText({ text: modifiedRequestCount.toString() });
+  chrome.action.setBadgeBackgroundColor({ color: '#4688F1' });
+}
+
+// Reset counter when extension starts
+chrome.runtime.onStartup.addListener(() => {
+  modifiedRequestCount = 0;
+  updateBadge();
+});
 
 // Load saved rule groups from storage when extension starts
 chrome.storage.local.get(['headerRuleGroups'], function(result) {
@@ -19,6 +32,7 @@ chrome.storage.local.get(['headerRuleGroups'], function(result) {
     
     updateDynamicRules();
   }
+  updateBadge(); // Initialize badge
 });
 
 // Listen for messages from the popup
@@ -141,3 +155,9 @@ function updateDynamicRules() {
     });
   });
 }
+
+// Listen for header modifications
+chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
+  modifiedRequestCount++;
+  updateBadge();
+});

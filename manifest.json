@@ -4,8 +4,9 @@
   "version": "1.0",
   "description": "Modify HTTP request headers for specific URLs",
   "permissions": [
+    "storage",
     "declarativeNetRequest",
-    "storage"
+    "declarativeNetRequestFeedback"
   ],
   "host_permissions": [
     "<all_urls>"
