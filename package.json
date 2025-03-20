@@ -2,7 +2,8 @@
   "name": "chrome-header-mod",
   "version": "1.0.0",
   "scripts": {
-    "generate-icons": "node generate-icons.js"
+    "generate-icons": "node generate-icons.js",
+    "package": "zip -r chrome-header-mod.zip . -x '*.git*' '*node_modules*' '*.zip'"
   },
   "dependencies": {
     "sharp": "^0.33.5"
