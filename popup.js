@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const newRuleRow = document.getElementById('newRuleRow');
   const saveNewRuleButton = document.getElementById('saveNewRule');
   
+  // Initialize by loading rules immediately after DOM is ready
+  loadRuleGroups();
+  
   function displayRuleGroups(ruleGroups) {
     // Clear existing rules but keep the new rule row
     while (rulesList.firstChild && rulesList.firstChild !== newRuleRow) {
@@ -175,13 +178,12 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function loadRuleGroups() {
     chrome.runtime.sendMessage({ action: 'getRuleGroups' }, function(response) {
-      displayRuleGroups(response.ruleGroups);
+      if (response && response.ruleGroups) {
+        displayRuleGroups(response.ruleGroups);
+      }
     });
   }
   
   // Event listeners
   saveNewRuleButton.addEventListener('click', handleNewRule);
-  
-  // Initialize
-  loadRuleGroups();
 });
