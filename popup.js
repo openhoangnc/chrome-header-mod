@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function editRule(row, group, operation) {
-    // Replace text content with input fields
+    // Create wrapper spans if they don't exist to maintain layout
     const cells = row.cells;
     
     // URL Match input
@@ -74,24 +74,36 @@ document.addEventListener('DOMContentLoaded', function() {
     matchInput.type = 'text';
     matchInput.className = 'match-input';
     matchInput.value = group.urlRule;
+    const matchWrapper = document.createElement('span');
+    matchWrapper.appendChild(matchInput);
     cells[0].textContent = '';
-    cells[0].appendChild(matchInput);
+    cells[0].appendChild(matchWrapper);
     
     // Header Name input
     const headerInput = document.createElement('input');
     headerInput.type = 'text';
     headerInput.className = 'header-input';
     headerInput.value = operation.header;
+    const headerWrapper = document.createElement('span');
+    headerWrapper.appendChild(headerInput);
     cells[1].textContent = '';
-    cells[1].appendChild(headerInput);
+    cells[1].appendChild(headerWrapper);
     
     // Header Value input
     const valueInput = document.createElement('input');
     valueInput.type = 'text';
     valueInput.className = 'value-input';
     valueInput.value = operation.value;
+    const valueWrapper = document.createElement('span');
+    valueWrapper.appendChild(valueInput);
     cells[2].textContent = '';
-    cells[2].appendChild(valueInput);
+    cells[2].appendChild(valueWrapper);
+    
+    // Focus the first input after rendering
+    requestAnimationFrame(() => {
+      matchInput.focus();
+      matchInput.select();
+    });
     
     // Replace buttons with Save/Cancel
     cells[3].innerHTML = '';
