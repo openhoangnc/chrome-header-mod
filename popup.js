@@ -201,10 +201,51 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  function loadRuleGroups() {
+  // Improved rule loading with fallback from storage
+  function loadRuleGroups(retryCount = 0) {
+    // Show loading state (optional)
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator) {
+      loadingIndicator.style.display = 'block';
+    }
+
     chrome.runtime.sendMessage({ action: 'getRuleGroups' }, function(response) {
+      // Handle error or empty response
+      if (chrome.runtime.lastError || !response) {
+        console.log('Error loading rules from background:', chrome.runtime.lastError);
+        
+        // Try to load directly from storage as fallback
+        chrome.storage.local.get(['headerRuleGroups'], function(result) {
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+          }
+          
+          if (result && result.headerRuleGroups) {
+            console.log('Loaded rules from storage fallback');
+            displayRuleGroups(result.headerRuleGroups);
+          } else if (retryCount < 3) {
+            // Retry a few times with increasing delay
+            setTimeout(() => {
+              loadRuleGroups(retryCount + 1);
+            }, 200 * (retryCount + 1));
+          }
+        });
+        return;
+      }
+      
+      // Hide loading indicator if it exists
+      if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+      }
+      
+      // Display rules if they exist in response
       if (response && response.ruleGroups) {
         displayRuleGroups(response.ruleGroups);
+      } else if (retryCount < 3) {
+        // Retry a few times with increasing delay
+        setTimeout(() => {
+          loadRuleGroups(retryCount + 1);
+        }, 200 * (retryCount + 1));
       }
     });
   }
