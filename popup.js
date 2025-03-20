@@ -68,7 +68,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  function setEditingMode(isEditing) {
+    // Disable/enable all edit buttons
+    const editButtons = document.querySelectorAll('.edit-button');
+    editButtons.forEach(button => {
+      button.disabled = isEditing;
+    });
+    
+    // Disable/enable all delete buttons
+    const deleteButtons = document.querySelectorAll('.delete-button:not(.cancel-button)');
+    deleteButtons.forEach(button => {
+      button.disabled = isEditing;
+    });
+    
+    // Disable/enable the save new rule button
+    const saveNewRuleButton = document.getElementById('saveNewRule');
+    saveNewRuleButton.disabled = isEditing;
+  }
+  
   function editRule(row, group, operation) {
+    // Set editing mode to disable other buttons
+    setEditingMode(true);
+    
     const cells = row.cells;
     
     // Create inputs
@@ -117,12 +138,16 @@ document.addEventListener('DOMContentLoaded', function() {
         updatedRuleGroup: updatedGroup
       }, function(response) {
         if (response.success) {
+          setEditingMode(false);
           loadRuleGroups();
         }
       });
     });
     
-    cancelButton.addEventListener('click', loadRuleGroups);
+    cancelButton.addEventListener('click', () => {
+      setEditingMode(false);
+      loadRuleGroups();
+    });
     
     cells[3].appendChild(saveButton);
     cells[3].appendChild(cancelButton);
