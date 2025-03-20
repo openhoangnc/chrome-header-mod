@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "generate-icons": "node generate-icons.js",
-    "package": "zip -r chrome-header-mod.zip . -x '*.git*' '*node_modules*' '*.zip'"
+    "package": "rm -f chrome-header-mod.zip && zip -r chrome-header-mod.zip . -x '*.git*' '*node_modules*' '*.zip' '*.DS_Store'"
   },
   "dependencies": {
     "sharp": "^0.33.5"
