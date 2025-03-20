@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark gray background with less padding -->
+  <rect x="5" y="5" width="118" height="118" rx="10" fill="#2F2F2F"/>
+  
+  <!-- Bigger "H" character in gold for better contrast -->
+  <path d="M30 25 L30 103 L50 103 L50 70 L78 70 L78 103 L98 103 L98 25 L78 25 L78 55 L50 55 L50 25 Z" fill="#FFD700"/>
+</svg>

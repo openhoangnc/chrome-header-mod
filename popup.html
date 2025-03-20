@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Header Modifier</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>HTTP Header Modifier</h1>
+    
+    <!-- Pattern List Screen (Default View) -->
+    <div id="patterns-list-screen">
+      <div class="header-actions">
+        <button id="addPatternButton" class="primary-button">+ Add Pattern</button>
+      </div>
+      
+      <div class="patterns-container">
+        <h2>URL Patterns</h2>
+        <div id="patternsList">
+          <!-- Patterns will be loaded here dynamically -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add/Edit Pattern Screen (Hidden by default) -->
+    <div id="pattern-edit-screen" style="display: none;">
+      <div class="header-actions">
+        <button id="backToListButton" class="secondary-button">← Back to List</button>
+      </div>
+      
+      <h2 id="pattern-form-title">Add New Pattern</h2>
+      <div class="form-group">
+        <label for="urlPattern">URL Pattern(s):</label>
+        <input type="text" id="urlPattern" placeholder="e.g., *://*.example.com/*, *://*.test.com/*">
+        <div class="input-hint">Multiple URL patterns can be separated by commas</div>
+      </div>
+      
+      <div id="operations-container">
+        <!-- Operation rows will be added here -->
+      </div>
+      
+      <div class="button-row">
+        <button id="addOperation">+ Add Operation</button>
+      </div>
+      
+      <div class="button-row">
+        <button id="savePattern">Save Pattern</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.container {
+  width: 380px;
+  padding: 15px;
+}
+
+h1 {
+  font-size: 18px;
+  margin-top: 0;
+  color: #333;
+}
+
+h2 {
+  font-size: 16px;
+  margin-top: 15px;
+  color: #555;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #3367d6;
+}
+
+#cancelEdit {
+  background-color: #999;
+  margin-left: 8px;
+}
+
+#cancelEdit:hover {
+  background-color: #777;
+}
+
+.rule-item {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.rule-buttons {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: flex;
+}
+
+.rule-delete {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  margin: 0;
+  margin-left: 5px;
+}
+
+.rule-edit {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.rule-header {
+  font-weight: bold;
+  padding-right: 100px;
+}
+
+.rule-details {
+  margin-top: 5px;
+  color: #555;
+}
+
+.no-rules {
+  color: #888;
+  font-style: italic;
+}
+
+.input-hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 3px;
+  font-style: italic;
+}
+
+/* URL patterns styling */
+.url-patterns-header {
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.url-patterns-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.url-patterns-list li {
+  margin-bottom: 2px;
+  word-break: break-all;
+}
+
+/* Multiple operations styling */
+#operations-container {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f8f8f8;
+}
+
+.operation-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #ccc;
+  position: relative;
+}
+
+.operation-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.header-group {
+  flex: 2;
+  margin-right: 10px;
+}
+
+.operation-group {
+  flex: 1;
+  min-width: 100px;
+  margin-right: 10px;
+}
+
+.value-group {
+  flex: 2;
+  margin-right: 10px;
+}
+
+.remove-operation {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 24px;
+  margin-left: auto;
+}
+
+.remove-operation:hover {
+  background-color: #d32f2f;
+}
+
+.button-row {
+  margin-top: 10px;
+}
+
+#addOperation {
+  background-color: #4caf50;
+  font-size: 13px;
+  padding: 5px 10px;
+}
+
+#addOperation:hover {
+  background-color: #388e3c;
+}
+
+/* Operations list in existing rules */
+.operations-list {
+  margin: 5px 0 0 0;
+  padding-left: 0;
+  list-style-type: none;
+}
+
+.operations-list li {
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 5px 8px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+  border-left: 3px solid #4285f4;
+}
+
+.operations-list .operation-remove {
+  border-left-color: #f44336;
+}
+
+.operations-list .operation-append {
+  border-left-color: #ff9800;
+}
+
+.operations-list .operation-set {
+  border-left-color: #4285f4;
+}
+
+/* Screen navigation styles */
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+#patterns-list-screen, #pattern-edit-screen {
+  width: 100%;
+}
+
+.primary-button {
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+}
+
+.primary-button:hover {
+  background-color: #388e3c;
+}
+
+.secondary-button {
+  background-color: #757575;
+  color: white;
+}
+
+.secondary-button:hover {
+  background-color: #616161;
+}
+
+/* Pattern card styling */
+.pattern-card {
+  background-color: #f9f9f9;
+  border-left: 4px solid #4285f4;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  padding: 12px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pattern-card:hover {
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  background-color: #f5f5f5;
+}
+
+.pattern-card-header {
+  font-weight: bold;
+  padding-right: 80px;
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+
+.pattern-card-operations {
+  color: #555;
+  font-size: 12px;
+}
+
+.pattern-card-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+}
+
+.pattern-card-edit, .pattern-card-delete {
+  padding: 3px 8px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.pattern-card-edit {
+  background-color: #ff9800;
+}
+
+.pattern-card-edit:hover {
+  background-color: #f57c00;
+}
+
+.pattern-card-delete {
+  background-color: #f44336;
+}
+
+.pattern-card-delete:hover {
+  background-color: #d32f2f;
+}

@@ -1,0 +1,10 @@
+{
+  "name": "chrome-header-mod",
+  "version": "1.0.0",
+  "scripts": {
+    "generate-icons": "node generate-icons.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}
