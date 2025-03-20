@@ -9,45 +9,24 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">HTTP Header Modifier</h1>
-      <div class="header-actions">
-        <button id="addRuleButton" class="primary-button">+ Add</button>
-        <button id="backToListButton" class="secondary-button" style="display: none;">← Back</button>
-      </div>
+      <h1 class="title">Header Modifier</h1>
     </div>
-    
-    <!-- Rule List Screen (Default View) -->
-    <div id="rules-list-screen">
-      <div class="rules-container">
-        <div id="rulesList">
-          <!-- Rules will be loaded here dynamically -->
-        </div>
-      </div>
-    </div>
-    
-    <!-- Add/Edit Rule Screen (Hidden by default) -->
-    <div id="rule-edit-screen" style="display: none;">      
-      <h2 id="rule-form-title">Add Rules</h2>
-      <div class="form-group">
-        <label for="urlRule">URL Rule(s):</label>
-        <input type="text" id="urlRule" placeholder="e.g., *://*.example.com/*, *://*.test.com/*">
-        <div class="input-hint">Multiple URL rules can be separated by commas</div>
-      </div>
-      
-      <div id="operations-container">
-        <!-- Operation rows will be added here -->
-      </div>
-      
-      <div class="button-row">
-        <button id="addOperation">Add Header</button>
-      </div>
-      
-      <div class="button-row">
-        <button id="saveRule">Save Rule</button>
-      </div>
-    </div>
+    <table class="rules-table">
+      <thead>
+        <tr>
+          <th>Match</th><th>Header</th><th>Value</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="rulesList">
+        <tr id="newRuleRow">
+          <td><input type="text" class="match-input" placeholder="*://*.example.com/*"></td>
+          <td><input type="text" class="header-input" placeholder="Header"></td>
+          <td><input type="text" class="value-input" placeholder="Value"></td>
+          <td><button id="saveNewRule" class="save-button">Save</button></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-  
   <script src="popup.js"></script>
 </body>
 </html>
