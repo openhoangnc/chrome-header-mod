@@ -1,19 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
   // DOM elements - screens
-  const patternsListScreen = document.getElementById('patterns-list-screen');
-  const patternEditScreen = document.getElementById('pattern-edit-screen');
+  const rulesListScreen = document.getElementById('rules-list-screen');
+  const ruleEditScreen = document.getElementById('rule-edit-screen');
   
-  // DOM elements - pattern list screen
-  const patternsListDiv = document.getElementById('patternsList');
-  const addPatternButton = document.getElementById('addPatternButton');
+  // DOM elements - rule list screen
+  const rulesListDiv = document.getElementById('rulesList');
+  const addRuleButton = document.getElementById('addRuleButton');
   
-  // DOM elements - pattern edit screen
+  // DOM elements - rule edit screen
   const backToListButton = document.getElementById('backToListButton');
-  const patternFormTitle = document.getElementById('pattern-form-title');
-  const urlPatternInput = document.getElementById('urlPattern');
+  const ruleFormTitle = document.getElementById('rule-form-title');
+  const urlRuleInput = document.getElementById('urlRule');
   const operationsContainer = document.getElementById('operations-container');
   const addOperationButton = document.getElementById('addOperation');
-  const savePatternButton = document.getElementById('savePattern');
+  const saveRuleButton = document.getElementById('saveRule');
   
   // Variables to track state
   let isEditing = false;
@@ -21,50 +21,100 @@ document.addEventListener('DOMContentLoaded', function() {
   let operationRowCounter = 0;
 
   // Screen navigation
-  function showPatternsListScreen() {
-    patternsListScreen.style.display = 'block';
-    patternEditScreen.style.display = 'none';
-    
-    // Refresh the patterns list
+  function showRulesListScreen() {
+    rulesListScreen.style.display = 'block';
+    ruleEditScreen.style.display = 'none';
+    addRuleButton.style.display = 'block';
+    backToListButton.style.display = 'none';
+    clearForm();
     loadRuleGroups();
   }
   
-  function showPatternEditScreen(isEdit = false, groupId = null) {
-    patternsListScreen.style.display = 'none';
-    patternEditScreen.style.display = 'block';
+  function showRuleEditScreen(isEdit = false, groupId = null) {
+    rulesListScreen.style.display = 'none';
+    ruleEditScreen.style.display = 'block';
+    addRuleButton.style.display = 'none';
+    backToListButton.style.display = 'block';
     
     // Set the form title based on whether we're editing
-    patternFormTitle.textContent = isEdit ? 'Edit Pattern' : 'Add New Pattern';
+    ruleFormTitle.textContent = isEdit ? 'Edit Rule' : 'Add New Rule';
     
     // Clear form and initialize
     clearForm();
     
-    // If editing, load the existing pattern data
+    // If editing, load the existing rule data
     if (isEdit && groupId !== null) {
       loadRuleGroupForEdit(groupId);
     }
   }
   
   // Button event listeners for navigation
-  addPatternButton.addEventListener('click', function() {
-    showPatternEditScreen(false);
+  addRuleButton.addEventListener('click', function() {
+    showRuleEditScreen(false);
   });
   
-  backToListButton.addEventListener('click', function() {
+  backToListButton.addEventListener('click', async function() {
     // Confirm if user has unsaved changes
-    if (hasFormChanges()) {
+    if (await hasFormChanges()) {
       if (!confirm('You have unsaved changes. Are you sure you want to go back?')) {
         return;
       }
     }
     
-    showPatternsListScreen();
+    showRulesListScreen();
   });
   
-  // Form change detection (simplified implementation)
-  function hasFormChanges() {
-    // Consider any non-empty URL pattern as a change
-    return urlPatternInput.value.trim() !== '';
+  // Form change detection 
+  async function hasFormChanges() {
+    if (isEditing) {
+      // Get current form values
+      const currentUrlRule = urlRuleInput.value.trim();
+      const currentOperations = collectOperations();
+      
+      // Get the original values
+      return new Promise((resolve) => {
+        chrome.runtime.sendMessage({
+          action: 'getRuleGroup',
+          ruleGroupId: editingRuleGroupId
+        }, function(response) {
+          if (response.ruleGroup) {
+            const originalGroup = response.ruleGroup;
+            
+            // Compare URL rules
+            if (currentUrlRule !== originalGroup.urlRule) {
+              resolve(true);
+              return;
+            }
+            
+            // Compare operations
+            if (currentOperations.length !== originalGroup.operations.length) {
+              resolve(true);
+              return;
+            }
+            
+            // Compare each operation
+            for (let i = 0; i < currentOperations.length; i++) {
+              const curr = currentOperations[i];
+              const orig = originalGroup.operations[i];
+              if (curr.header !== orig.header || 
+                  curr.operation !== orig.operation || 
+                  curr.value !== orig.value) {
+                resolve(true);
+                return;
+              }
+            }
+            resolve(false);
+          } else {
+            resolve(false);
+          }
+        });
+      });
+    } else {
+      // For new rules, check if any fields are filled
+      const urlRule = urlRuleInput.value.trim();
+      const operations = collectOperations();
+      return urlRule !== '' || operations.length > 0;
+    }
   }
 
   // Add operation button handler
@@ -95,39 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     headerGroup.appendChild(headerLabel);
     headerGroup.appendChild(headerInput);
     
-    // Create operation select
-    const operationGroup = document.createElement('div');
-    operationGroup.className = 'form-group operation-group';
-    
-    const operationLabel = document.createElement('label');
-    operationLabel.setAttribute('for', `operation-${operationRowCounter}`);
-    operationLabel.textContent = 'Operation:';
-    
-    const operationSelect = document.createElement('select');
-    operationSelect.className = 'operation-select';
-    operationSelect.id = `operation-${operationRowCounter}`;
-    
-    const setOption = document.createElement('option');
-    setOption.value = 'set';
-    setOption.textContent = 'Set';
-    
-    const appendOption = document.createElement('option');
-    appendOption.value = 'append';
-    appendOption.textContent = 'Append';
-    
-    const removeOption = document.createElement('option');
-    removeOption.value = 'remove';
-    removeOption.textContent = 'Remove';
-    
-    operationSelect.appendChild(setOption);
-    operationSelect.appendChild(appendOption);
-    operationSelect.appendChild(removeOption);
-    operationSelect.value = operationValue;
-    
-    operationGroup.appendChild(operationLabel);
-    operationGroup.appendChild(operationSelect);
-    
-    // Create value input
+    // Create value input (no operation select needed since we only support 'set')
     const valueGroup = document.createElement('div');
     valueGroup.className = 'form-group value-group';
     
@@ -159,53 +177,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add all elements to the row
     operationRow.appendChild(headerGroup);
-    operationRow.appendChild(operationGroup);
     operationRow.appendChild(valueGroup);
     operationRow.appendChild(removeButton);
     
     // Add the row to the container
     operationsContainer.appendChild(operationRow);
     
-    // Show/hide remove buttons and set up operation select change handlers
+    // Show/hide remove buttons
     updateRemoveButtons();
-    setupOperationChangeHandlers();
     
     // Update counter for next row
     operationRowCounter++;
   }
 
-  // Show/hide value inputs based on operation
-  function setupOperationChangeHandlers() {
-    const operationSelects = document.querySelectorAll('.operation-select');
-    
-    operationSelects.forEach(select => {
-      // Remove any existing event listeners
-      const newSelect = select.cloneNode(true);
-      select.parentNode.replaceChild(newSelect, select);
-      
-      // Add new event listener
-      newSelect.addEventListener('change', function() {
-        const row = this.closest('.operation-row');
-        const valueGroup = row.querySelector('.value-group');
-        
-        if (this.value === 'remove') {
-          valueGroup.style.display = 'none';
-        } else {
-          valueGroup.style.display = 'block';
-        }
-      });
-      
-      // Set initial state
-      const row = newSelect.closest('.operation-row');
-      const valueGroup = row.querySelector('.value-group');
-      
-      if (newSelect.value === 'remove') {
-        valueGroup.style.display = 'none';
-      } else {
-        valueGroup.style.display = 'block';
-      }
-    });
-  }
+  // Remove setupOperationChangeHandlers since we no longer need it
 
   // Show/hide remove buttons based on number of operation rows
   function updateRemoveButtons() {
@@ -229,40 +214,34 @@ document.addEventListener('DOMContentLoaded', function() {
     
     rows.forEach(row => {
       const headerInput = row.querySelector('.header-input');
-      const operationSelect = row.querySelector('.operation-select');
       const valueInput = row.querySelector('.value-input');
       
       const header = headerInput.value.trim();
-      const operation = operationSelect.value;
       const value = valueInput.value.trim();
       
       // Basic validation
-      if (!header) {
-        return; // Skip this row if no header
-      }
-      
-      if (operation !== 'remove' && !value) {
-        return; // Skip this row if value is required but missing
+      if (!header || !value) {
+        return; // Skip this row if header or value is missing
       }
       
       operations.push({
         header: header,
-        operation: operation,
-        value: operation !== 'remove' ? value : ''
+        operation: 'set', // Always set since it's the only operation we support
+        value: value
       });
     });
     
     return operations;
   }
 
-  // Save pattern button handler
-  savePatternButton.addEventListener('click', function() {
-    const urlPattern = urlPatternInput.value.trim();
+  // Save rule button handler
+  saveRuleButton.addEventListener('click', function() {
+    const urlRule = urlRuleInput.value.trim();
     const operations = collectOperations();
     
     // Basic validation
-    if (!urlPattern) {
-      alert('Please enter a URL pattern');
+    if (!urlRule) {
+      alert('Please enter a URL rule');
       return;
     }
     
@@ -273,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create the rule group object
     const ruleGroup = {
-      urlPattern: urlPattern,
+      urlRule: urlRule,
       operations: operations
     };
     
@@ -285,8 +264,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updatedRuleGroup: ruleGroup
       }, function(response) {
         if (response.success) {
-          // Return to the patterns list screen
-          showPatternsListScreen();
+          // Return to the rules list screen
+          showRulesListScreen();
         }
       });
     } else {
@@ -296,8 +275,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ruleGroup: ruleGroup
       }, function(response) {
         if (response.success) {
-          // Return to the patterns list screen
-          showPatternsListScreen();
+          // Return to the rules list screen
+          showRulesListScreen();
         }
       });
     }
@@ -305,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Helper function to clear the form
   function clearForm() {
-    urlPatternInput.value = '';
+    urlRuleInput.value = '';
     
     // Clear all operation rows
     operationsContainer.innerHTML = '';
@@ -327,8 +306,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (response.ruleGroup) {
         const ruleGroup = response.ruleGroup;
         
-        // Set URL pattern
-        urlPatternInput.value = ruleGroup.urlPattern;
+        // Set URL rule
+        urlRuleInput.value = ruleGroup.urlRule;
         
         // Clear existing operations
         operationsContainer.innerHTML = '';
@@ -352,71 +331,71 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Display rule groups as pattern cards
+  // Display rule groups as rule cards
   function displayRuleGroups(ruleGroups) {
-    patternsListDiv.innerHTML = '';
+    rulesListDiv.innerHTML = '';
     
     if (!ruleGroups || ruleGroups.length === 0) {
-      patternsListDiv.innerHTML = '<div class="no-rules">No patterns added yet</div>';
+      rulesListDiv.innerHTML = '<div class="no-rules">No rules added yet</div>';
       return;
     }
 
     ruleGroups.forEach(group => {
-      const patternCard = document.createElement('div');
-      patternCard.className = 'pattern-card';
-      patternCard.dataset.id = group.id;
+      const ruleCard = document.createElement('div');
+      ruleCard.className = 'rule-card';
+      ruleCard.dataset.id = group.id;
       
-      // Pattern header
-      const patternHeader = document.createElement('div');
-      patternHeader.className = 'pattern-card-header';
+      // Rule header
+      const ruleHeader = document.createElement('div');
+      ruleHeader.className = 'rule-card-header';
       
-      // Get the URL patterns
-      const urlPatterns = group.urlPattern.split(',').map(p => p.trim()).filter(p => p);
-      patternHeader.textContent = urlPatterns.length > 1 
-        ? `${urlPatterns[0]} and ${urlPatterns.length - 1} more...` 
-        : urlPatterns[0];
+      // Get the URL rules
+      const urlRules = group.urlRule.split(',').map(p => p.trim()).filter(p => p);
+      ruleHeader.textContent = urlRules.length > 1 
+        ? `${urlRules[0]} and ${urlRules.length - 1} more...` 
+        : urlRules[0];
       
       // Operations summary
-      const patternOperations = document.createElement('div');
-      patternOperations.className = 'pattern-card-operations';
-      patternOperations.textContent = `${group.operations.length} operation${group.operations.length !== 1 ? 's' : ''}`;
+      const ruleOperations = document.createElement('div');
+      ruleOperations.className = 'rule-card-operations';
+      ruleOperations.textContent = `${group.operations.length} operation${group.operations.length !== 1 ? 's' : ''}`;
       
       // Action buttons
-      const patternActions = document.createElement('div');
-      patternActions.className = 'pattern-card-actions';
+      const ruleActions = document.createElement('div');
+      ruleActions.className = 'rule-card-actions';
       
       const editButton = document.createElement('button');
-      editButton.className = 'pattern-card-edit';
+      editButton.className = 'rule-card-edit';
       editButton.textContent = 'Edit';
       editButton.addEventListener('click', function(e) {
         e.stopPropagation();
-        showPatternEditScreen(true, group.id);
+        showRuleEditScreen(true, group.id);
       });
       
       const deleteButton = document.createElement('button');
-      deleteButton.className = 'pattern-card-delete';
+      deleteButton.className = 'rule-card-delete';
       deleteButton.textContent = 'Delete';
       deleteButton.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (confirm('Are you sure you want to delete this pattern?')) {
+        if (confirm('Are you sure you want to delete this rule?')) {
           deleteRuleGroup(group.id);
         }
       });
       
-      patternActions.appendChild(editButton);
-      patternActions.appendChild(deleteButton);
+      ruleActions.appendChild(editButton);
+      ruleActions.appendChild(deleteButton);
       
       // Make the entire card clickable to edit
-      patternCard.addEventListener('click', function() {
-        showPatternEditScreen(true, group.id);
+      ruleCard.addEventListener('click', function() {
+        showRuleEditScreen(true, group.id);
       });
       
       // Assemble the card
-      patternCard.appendChild(patternHeader);
-      patternCard.appendChild(patternOperations);
-      patternCard.appendChild(patternActions);
+      ruleCard.appendChild(ruleHeader);
+      ruleCard.appendChild(ruleOperations);
+      ruleCard.appendChild(ruleActions);
       
-      patternsListDiv.appendChild(patternCard);
+      rulesListDiv.appendChild(ruleCard);
     });
   }
 
@@ -432,6 +411,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Start the app - show the patterns list screen
-  showPatternsListScreen();
+  // Start the app - show the rules list screen
+  showRulesListScreen();
 });

@@ -97,13 +97,13 @@ function updateDynamicRules() {
     
     // Process each rule group
     ruleGroups.forEach(group => {
-      // Split URL patterns by comma and trim whitespace
-      const urlPatterns = group.urlPattern.split(',')
-                                         .map(pattern => pattern.trim())
-                                         .filter(pattern => pattern.length > 0);
+      // Split URL rules by comma and trim whitespace
+      const urlRules = group.urlRule.split(',')
+                                         .map(rule => rule.trim())
+                                         .filter(rule => rule.length > 0);
       
-      // For each URL pattern, create a set of declarativeNetRequest rules - one for each operation
-      urlPatterns.forEach(urlPattern => {
+      // For each URL rule, create a set of declarativeNetRequest rules - one for each operation
+      urlRules.forEach(urlRule => {
         group.operations.forEach(operation => {
           // Skip operations without required fields
           if (!operation.header) return;
@@ -123,7 +123,7 @@ function updateDynamicRules() {
               ]
             },
             condition: {
-              urlFilter: urlPattern,
+              urlFilter: urlRule,
               resourceTypes: ["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "other"]
             }
           });
