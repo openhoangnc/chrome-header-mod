@@ -33,7 +33,7 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 // Load saved rule groups from storage when extension starts
-chrome.storage.local.get(['headerRuleGroups'], function(result) {
+chrome.storage.sync.get(['headerRuleGroups'], function(result) {
   debugLog('Loading rules from storage', result);
   if (result.headerRuleGroups) {
     ruleGroups = result.headerRuleGroups;
@@ -97,7 +97,7 @@ function addRuleGroup(ruleGroup) {
   debugLog('Rule group added, new count:', ruleGroups.length);
   
   // Save rule groups to storage
-  chrome.storage.local.set({headerRuleGroups: ruleGroups}, () => {
+  chrome.storage.sync.set({headerRuleGroups: ruleGroups}, () => {
     debugLog('Rule groups saved to storage');
   });
   
@@ -119,7 +119,7 @@ function updateRuleGroup(id, updatedRuleGroup) {
     debugLog('Rule group updated', {id, index, updatedRuleGroup});
     
     // Save rule groups to storage
-    chrome.storage.local.set({headerRuleGroups: ruleGroups}, () => {
+    chrome.storage.sync.set({headerRuleGroups: ruleGroups}, () => {
       debugLog('Updated rule groups saved to storage');
     });
     
@@ -138,7 +138,7 @@ function deleteRuleGroup(id) {
   debugLog('Rule group deleted', {id, previousCount, newCount: ruleGroups.length});
   
   // Save rule groups to storage
-  chrome.storage.local.set({headerRuleGroups: ruleGroups}, () => {
+  chrome.storage.sync.set({headerRuleGroups: ruleGroups}, () => {
     debugLog('Rule groups saved after deletion');
   });
   
@@ -229,6 +229,5 @@ function updateDynamicRules() {
 // Listen for header modifications
 chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
   modifiedRequestCount++;
-  debugLog('Rule matched', {ruleId: info.rule.ruleId, request: info.request});
   updateBadge();
 });

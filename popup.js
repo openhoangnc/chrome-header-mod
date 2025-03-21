@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Try to load directly from storage as fallback
-        chrome.storage.local.get(['headerRuleGroups'], function(result) {
+        chrome.storage.sync.get(['headerRuleGroups'], function(result) {
           if (loadingIndicator) {
             loadingIndicator.style.display = 'none';
           }
