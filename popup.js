@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Replace action buttons
-    cells[4].innerHTML = '';
+    cells[cells.length-1].innerHTML = '';
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save';
     saveButton.className = 'save-button';
@@ -207,8 +207,8 @@ document.addEventListener('DOMContentLoaded', function () {
       loadRules();
     });
 
-    cells[4].appendChild(saveButton);
-    cells[4].appendChild(cancelButton);
+    cells[cells.length-1].appendChild(saveButton);
+    cells[cells.length-1].appendChild(cancelButton);
   }
 
   function handleNewRule() {
