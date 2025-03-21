@@ -50,9 +50,25 @@ npm install
 # Generate icons
 npm run generate-icons
 
+# Toggle debug mode on (development)
+npm run debug:on
+
+# Toggle debug mode off (production)
+npm run debug:off
+
+# Build and package the extension (sets to production mode)
+npm run build
+
 # Package the extension
 npm run package
 ```
+
+### Debug Mode
+
+The extension includes a debug mode that can be toggled on or off:
+- `npm run debug:on` - Enables additional logging and debug features
+- `npm run debug:off` - Disables debug features for production use
+- `npm run build` - Convenience script that disables debug mode and packages the extension
 
 ### Project Structure
 
