@@ -123,6 +123,10 @@ button:disabled {
   width: 70px;
   text-align: center;
 }
+.rules-table th:nth-child(5) {
+  width: 70px;
+  text-align: center;
+}
 .rules-table th:last-child {
   width: 120px;
 }

@@ -3,8 +3,8 @@
 
 let rules = [];
 let ruleId = 1;
-let nextRuleId = 1000; // Start with a high ID to avoid conflicts
 let modifiedRequestCount = 0;
+let ruleMatchCounts = {}; // Track match counts per rule
 
 // Debug mode flag - will be automatically set by the build script
 const isDebugMode = true;
@@ -29,15 +29,16 @@ function updateBadge() {
   rotationIndex = (rotationIndex + 1) % rotatingCharacters.length;
 }
 
-// Reset counter when extension starts
+// Reset counters when extension starts
 chrome.runtime.onStartup.addListener(() => {
   debugLog('Extension startup event triggered');
   modifiedRequestCount = 0;
+  ruleMatchCounts = {};
   updateBadge();
 });
 
 // Load saved rules from storage when extension starts
-chrome.storage.sync.get(['headerRules'], function (result) {
+chrome.storage.sync.get(['headerRules', 'ruleMatchCounts'], function (result) {
   debugLog('Loading rules from storage', result);
   if (result.headerRules) {
     rules = result.headerRules;
@@ -49,6 +50,11 @@ chrome.storage.sync.get(['headerRules'], function (result) {
         ruleId = rule.id + 1;
       }
     });
+
+    // Load saved match counts if they exist
+    if (result.ruleMatchCounts) {
+      ruleMatchCounts = result.ruleMatchCounts;
+    }
 
     updateDynamicRules();
   } else {
@@ -71,7 +77,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ success: true });
   } else if (message.action === 'getRules') {
     debugLog('Getting rules, current count:', rules.length);
-    sendResponse({ rules: rules });
+    // Include match counts with rules
+    const rulesWithCounts = rules.map(rule => ({
+      ...rule,
+      matchCount: ruleMatchCounts[rule.id] || 0
+    }));
+    sendResponse({ rules: rulesWithCounts });
   } else if (message.action === 'deleteRule') {
     debugLog('Deleting rule', message.ruleId);
     deleteRule(message.ruleId);
@@ -139,6 +150,10 @@ function deleteRule(id) {
   const previousCount = rules.length;
   rules = rules.filter(rule => rule.id !== id);
 
+  // Clean up match count for deleted rule
+  delete ruleMatchCounts[id];
+  chrome.storage.sync.set({ ruleMatchCounts });
+
   debugLog('Rule deleted', { id, previousCount, newCount: rules.length });
 
   // Save rules to storage
@@ -150,10 +165,11 @@ function deleteRule(id) {
   updateDynamicRules();
 }
 
+let ruleUpdateCounter = 0;
 // Update the dynamic rules based on current rules
 function updateDynamicRules() {
+  ruleUpdateCounter++;
   let dynamicRules = [];
-  let ruleCounter = nextRuleId;
 
   debugLog('Updating dynamic rules', rules);
 
@@ -175,18 +191,14 @@ function updateDynamicRules() {
         .map(rule => rule.trim())
         .filter(rule => rule.length > 0);
 
-      debugLog('Processing rule', {rule, urlMatches });
+      debugLog('Processing rule', { rule, urlMatches });
 
-      // For each URL rule, create a set of declarativeNetRequest rules - one for each rule
+      // For each URL rule, create a set of declarativeNetRequest rules
+
+      let dynamicRuleId = rule.id * 1_000_000 + ruleUpdateCounter * 1000;
       urlMatches.forEach(urlMatch => {
-        // Skip rules without required fields
-        if (!rule.header) {
-          debugLog('Skipping rule with no header', urlMatch);
-          return;
-        }
-
         dynamicRules.push({
-          id: ruleCounter++,
+          id: dynamicRuleId++,
           priority: 1,
           action: {
             type: "modifyHeaders",
@@ -206,7 +218,7 @@ function updateDynamicRules() {
       });
     });
 
-    debugLog('New dynamic rules to add:', dynamicRules.length);
+    debugLog('New dynamic rules to add:', dynamicRules);
 
     // Remove old rules and add new ones
     chrome.declarativeNetRequest.updateDynamicRules({
@@ -217,8 +229,6 @@ function updateDynamicRules() {
         debugLog('Error updating dynamic rules:', chrome.runtime.lastError);
       } else {
         debugLog('Dynamic rules updated successfully');
-        // Update the next rule ID for future rules
-        nextRuleId = ruleCounter;
       }
     });
   });
@@ -227,5 +237,22 @@ function updateDynamicRules() {
 // Listen for header modifications
 chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
   modifiedRequestCount++;
+
+  debugLog('Header modification detected', info.rule, rules);
+
+  // Find the rule that matched
+  const matchedRule = rules.find(rule => {
+    return Math.floor(info.rule.ruleId/1_000_000) === rule.id;
+  });
+
+  if (matchedRule) {
+    // Increment the match count for this rule
+    ruleMatchCounts[matchedRule.id] = (ruleMatchCounts[matchedRule.id] || 0) + 1;
+    // Save updated counts to storage
+    chrome.storage.sync.set({ ruleMatchCounts });
+
+    debugLog('Match count updated', { rule: matchedRule, count: ruleMatchCounts[matchedRule.id] });
+  }
+
   updateBadge();
 });

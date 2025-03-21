@@ -57,6 +57,14 @@ document.addEventListener('DOMContentLoaded', function () {
       valueCell.appendChild(valueSpan);
       row.appendChild(valueCell);
 
+      // Match count cell
+      const matchCountCell = document.createElement('td');
+      matchCountCell.style.textAlign = 'center';
+      const matchCountSpan = document.createElement('span');
+      matchCountSpan.textContent = rule.matchCount.toLocaleString();
+      matchCountCell.appendChild(matchCountSpan);
+      row.appendChild(matchCountCell);
+
       // Toggle switch cell
       const toggleCell = document.createElement('td');
       toggleCell.style.textAlign = 'center';
