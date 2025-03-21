@@ -19,10 +19,14 @@ function debugLog(message, data) {
 debugLog('Background script initialized');
 debugLog('Debug mode:', isDebugMode);
 
-// Update badge with current count
+const rotatingCharacters = ['◐', '◓', '◑', '◒'];
+let rotationIndex = 0;
+
+// Update badge with rotating characters
 function updateBadge() {
-  chrome.action.setBadgeText({ text: modifiedRequestCount.toString() });
+  chrome.action.setBadgeText({ text: rotatingCharacters[rotationIndex] });
   chrome.action.setBadgeBackgroundColor({ color: '#4688F1' });
+  rotationIndex = (rotationIndex + 1) % rotatingCharacters.length;
 }
 
 // Reset counter when extension starts
