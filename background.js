@@ -86,10 +86,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Add a new rule group
 function addRuleGroup(ruleGroup) {
-  // Create a unique ID for the rule group
+  // Create a unique ID for the rule group and set enabled by default
   const newRuleGroup = {
     ...ruleGroup,
-    id: ruleGroupId++
+    id: ruleGroupId++,
+    enabled: true
   };
   
   ruleGroups.push(newRuleGroup);
@@ -109,8 +110,10 @@ function updateRuleGroup(id, updatedRuleGroup) {
   const index = ruleGroups.findIndex(group => group.id === id);
   
   if (index !== -1) {
-    // Keep the same rule group ID
+    // Keep the same rule group ID and enabled state if not provided
     updatedRuleGroup.id = id;
+    updatedRuleGroup.enabled = 'enabled' in updatedRuleGroup ? updatedRuleGroup.enabled : ruleGroups[index].enabled;
+    
     ruleGroups[index] = updatedRuleGroup;
     
     debugLog('Rule group updated', {id, index, updatedRuleGroup});
@@ -155,8 +158,14 @@ function updateDynamicRules() {
     const existingRuleIds = existingRules.map(rule => rule.id);
     debugLog('Existing rule count to remove:', existingRuleIds.length);
     
-    // Process each rule group
+    // Process each enabled rule group
     ruleGroups.forEach(group => {
+      // Skip disabled rules
+      if (!group.enabled) {
+        debugLog('Skipping disabled rule group', {id: group.id});
+        return;
+      }
+
       // Split URL rules by comma and trim whitespace
       const urlRules = group.urlRule.split(',')
                                    .map(rule => rule.trim())

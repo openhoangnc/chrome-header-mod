@@ -58,6 +58,38 @@ document.addEventListener('DOMContentLoaded', function() {
         valueCell.appendChild(valueSpan);
         row.appendChild(valueCell);
         
+        // Toggle switch cell
+        const toggleCell = document.createElement('td');
+        toggleCell.style.textAlign = 'center';
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'toggle-switch';
+        const toggleInput = document.createElement('input');
+        toggleInput.type = 'checkbox';
+        toggleInput.checked = group.enabled;
+        const toggleSlider = document.createElement('span');
+        toggleSlider.className = 'toggle-slider';
+        
+        toggleInput.addEventListener('change', () => {
+          const updatedGroup = {...group, enabled: toggleInput.checked};
+          chrome.runtime.sendMessage({
+            action: 'updateRuleGroup',
+            ruleGroupId: group.id,
+            updatedRuleGroup: updatedGroup
+          }, function(response) {
+            if (response && response.success) {
+              row.classList.toggle('disabled-rule', !toggleInput.checked);
+            } else {
+              toggleInput.checked = !toggleInput.checked; // Revert on failure
+              alert('Failed to update rule. Please try again.');
+            }
+          });
+        });
+        
+        toggleLabel.appendChild(toggleInput);
+        toggleLabel.appendChild(toggleSlider);
+        toggleCell.appendChild(toggleLabel);
+        row.appendChild(toggleCell);
+        
         // Actions cell
         const actionsCell = document.createElement('td');
         const editButton = document.createElement('button');
@@ -130,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Replace action buttons
-    cells[3].innerHTML = '';
+    cells[4].innerHTML = '';
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save';
     saveButton.className = 'save-button';
@@ -172,8 +204,8 @@ document.addEventListener('DOMContentLoaded', function() {
       loadRuleGroups();
     });
     
-    cells[3].appendChild(saveButton);
-    cells[3].appendChild(cancelButton);
+    cells[4].appendChild(saveButton);
+    cells[4].appendChild(cancelButton);
   }
   
   function handleNewRule() {

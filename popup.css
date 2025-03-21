@@ -111,13 +111,17 @@ button:disabled {
 }
 
 .rules-table th:first-child{
-  width: 180px;
+  width: 160px;
 }
 .rules-table th:nth-child(2) {
-  width: 180px;
+  width: 160px;
 }
 .rules-table th:nth-child(3) {
-  width: 180px;
+  width: 160px;
+}
+.rules-table th:nth-child(4) {
+  width: 70px;
+  text-align: center;
 }
 .rules-table th:last-child {
   width: 120px;
@@ -214,4 +218,52 @@ button:disabled {
 
 #newRuleRow:hover {
   background-color: #f0f0f0;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  margin: 0 8px;
+  vertical-align: middle;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .2s;
+  border-radius: 20px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #4285f4;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(16px);
 }
