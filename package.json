@@ -6,7 +6,7 @@
     "debug:on": "node tools/set-debug-mode.js",
     "debug:off": "node tools/set-debug-mode.js production",
     "unpackage": "rm -rf chrome-header-mod && unzip chrome-header-mod.zip -d chrome-header-mod",
-    "package": "rm -f chrome-header-mod.zip && zip -r chrome-header-mod.zip . -x '*.git*' '*tools*' '*node_modules*' '*.zip' '*.DS_Store' package.json README.md LICENSE package-lock.json icons/icon.svg icons/README.txt",
+    "package": "rm -f chrome-header-mod.zip && zip -r chrome-header-mod.zip manifest.json background.js popup.html popup.css popup.js icons/icon16.png icons/icon48.png icons/icon128.png",
     "build": "npm run debug:off && npm run package && npm run debug:on && npm run unpackage"
   },
   "dependencies": {
