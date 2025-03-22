@@ -14,6 +14,13 @@ A Chrome extension that allows you to modify HTTP request headers for specific U
 
 ## Installation
 
+### From Chrome Web Store
+
+1. Visit the [Chrome Web Store page](https://chromewebstore.google.com/detail/lhjnapningfniffjhppldmpgebkdahpp?utm_source=item-share-cb)
+2. Click "Add to Chrome" to install the extension
+
+### Manual Installation
+
 1. Clone this repository or download the ZIP file
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" in the top right corner
