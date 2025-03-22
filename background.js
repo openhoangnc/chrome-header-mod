@@ -234,6 +234,23 @@ function updateDynamicRules() {
   });
 }
 
+
+function saveMatchCounts() {
+  chrome.storage.sync.set({ ruleMatchCounts }, () => {
+    debugLog('Match counts saved to storage');
+  });
+}
+
+function debounce(func, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+const debouncedSaveMatchCounts = debounce(saveMatchCounts, 1000);
+
 // Listen for header modifications
 chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
   modifiedRequestCount++;
@@ -248,9 +265,9 @@ chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
   if (matchedRule) {
     // Increment the match count for this rule
     ruleMatchCounts[matchedRule.id] = (ruleMatchCounts[matchedRule.id] || 0) + 1;
-    // Save updated counts to storage
-    chrome.storage.sync.set({ ruleMatchCounts });
 
+    debouncedSaveMatchCounts();
+    
     debugLog('Match count updated', { rule: matchedRule, count: ruleMatchCounts[matchedRule.id] });
   }
 
