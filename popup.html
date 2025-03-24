@@ -10,22 +10,55 @@
   <div class="container">
     <div class="header">
       <h1 class="title">HTTP Header Modifier</h1>
+      <div class="tabs">
+        <button class="tab-button active" data-tab="rules-tab">Rules</button>
+        <button class="tab-button" data-tab="requests-tab">Request Tracking</button>
+      </div>
     </div>
-    <table class="rules-table">
-      <thead>
-        <tr>
-          <th>Match</th><th>Header</th><th>Value</th><th>Enabled</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="rulesList">
-        <tr id="newRuleRow">
-          <td><input type="text" class="match-input" placeholder="*://*.example.com/*"></td>
-          <td><input type="text" class="header-input" placeholder="Header"></td>
-          <td colspan="2"><input type="text" class="value-input" placeholder="Value"></td>
-          <td colspan="1"><button id="saveNewRule" class="save-button">Save</button></td>
-        </tr>
-      </tbody>
-    </table>
+    
+    <div id="rules-tab" class="tab-content active">
+      <table class="rules-table">
+        <thead>
+          <tr>
+            <th>Match</th><th>Header</th><th>Value</th><th>Enabled</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rulesList">
+          <tr id="newRuleRow">
+            <td><input type="text" class="match-input" placeholder="*://*.example.com/*"></td>
+            <td><input type="text" class="header-input" placeholder="Header"></td>
+            <td colspan="2"><input type="text" class="value-input" placeholder="Value"></td>
+            <td colspan="1"><button id="saveNewRule" class="save-button">Save</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div id="requests-tab" class="tab-content">
+      <div class="request-stats">
+        <div class="stat-box">
+          <span class="stat-label">Total Matched Requests:</span>
+          <span id="matchedRequestCount" class="stat-value">0</span>
+        </div>
+        <button id="clearStats" class="clear-button">Clear Stats</button>
+      </div>
+      
+      <div class="request-list-container">
+        <table class="request-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>URL</th>
+              <th>Matched Rules</th>
+            </tr>
+          </thead>
+          <tbody id="requestList">
+            <!-- Request entries will be added here -->
+          </tbody>
+        </table>
+        <div id="noRequests" class="no-data-message">No matched requests yet. Browse to a site that matches your rules.</div>
+      </div>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>

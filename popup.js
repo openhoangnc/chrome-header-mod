@@ -2,6 +2,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const rulesList = document.getElementById('rulesList');
   const newRuleRow = document.getElementById('newRuleRow');
   const saveNewRuleButton = document.getElementById('saveNewRule');
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const requestList = document.getElementById('requestList');
+  const matchedRequestCount = document.getElementById('matchedRequestCount');
+  const clearStatsButton = document.getElementById('clearStats');
+  const noRequestsMessage = document.getElementById('noRequests');
 
   // Debug mode flag - will be automatically set by the build script
   const isDebugMode = true;
@@ -18,6 +24,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
   debugLog('Popup loaded - DOM content loaded');
   debugLog('Debug mode:', isDebugMode);
+
+  // Tab switching logic
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all tabs
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+
+      // Add active class to clicked tab
+      button.classList.add('active');
+      const tabId = button.dataset.tab;
+      document.getElementById(tabId).classList.add('active');
+
+      // Load request data if switching to requests tab
+      if (tabId === 'requests-tab') {
+        loadRequestStats();
+      }
+    });
+  });
 
   // Get the current tab URL
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -414,8 +439,99 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Load request tracking stats
+  function loadRequestStats() {
+    debugLog('Loading request tracking stats');
+
+    chrome.runtime.sendMessage({ action: 'getRequestStats' }, function(response) {
+      if (chrome.runtime.lastError) {
+        debugLog('Error loading request stats', chrome.runtime.lastError);
+        return;
+      }
+
+      if (response) {
+        // Update the counter
+        matchedRequestCount.textContent = response.modifiedCount || 0;
+
+        // Clear existing request list
+        requestList.innerHTML = '';
+
+        // Show/hide no requests message
+        if (!response.recentRequests || response.recentRequests.length === 0) {
+          noRequestsMessage.style.display = 'block';
+          return;
+        } else {
+          noRequestsMessage.style.display = 'none';
+        }
+
+        // Add each request to the table
+        response.recentRequests.forEach(request => {
+          const row = document.createElement('tr');
+
+          // Time cell
+          const timeCell = document.createElement('td');
+          const date = new Date(request.timestamp);
+          timeCell.textContent = date.toLocaleTimeString();
+          row.appendChild(timeCell);
+
+          // URL cell
+          const urlCell = document.createElement('td');
+          urlCell.className = 'url-cell';
+          urlCell.textContent = request.url;
+          urlCell.title = request.url; // Show full URL on hover
+          row.appendChild(urlCell);
+
+          // Matched Rules cell
+          const rulesCell = document.createElement('td');
+
+          if (request.matchedRules && request.matchedRules.length > 0) {
+            request.matchedRules.forEach(rule => {
+              const ruleBadge = document.createElement('div');
+              ruleBadge.className = 'rule-badge';
+              ruleBadge.textContent = `${rule.header}: ${rule.value}`;
+              ruleBadge.title = `Rule ID: ${rule.id}`;
+              rulesCell.appendChild(ruleBadge);
+            });
+          } else {
+            rulesCell.textContent = 'No rule details available';
+          }
+
+          row.appendChild(rulesCell);
+          requestList.appendChild(row);
+        });
+
+        debugLog('Request stats loaded', { 
+          count: response.modifiedCount, 
+          recentRequests: response.recentRequests.length 
+        });
+      }
+    });
+  }
+
+  // Clear request stats
+  function clearRequestStats() {
+    debugLog('Clearing request stats');
+
+    chrome.runtime.sendMessage({ action: 'clearRequestStats' }, function(response) {
+      if (chrome.runtime.lastError) {
+        debugLog('Error clearing request stats', chrome.runtime.lastError);
+        return;
+      }
+
+      if (response && response.success) {
+        // Reset UI
+        matchedRequestCount.textContent = '0';
+        requestList.innerHTML = '';
+        noRequestsMessage.style.display = 'block';
+
+        debugLog('Request stats cleared successfully');
+      }
+    });
+  }
+
   // Event listeners
   saveNewRuleButton.addEventListener('click', handleNewRule);
+  clearStatsButton.addEventListener('click', clearRequestStats);
 
   // Periodically check connection to background and reload rules if needed
   const checkBackgroundConnection = () => {
@@ -434,4 +550,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Check connection every 30 seconds
   setInterval(checkBackgroundConnection, 30000);
+
+  // Auto-refresh request stats when the popup is open
+  let requestStatsRefreshInterval = null;
+
+  // Set up auto-refresh when the requests tab is active
+  function setupRequestStatsRefresh() {
+    const requestsTab = document.querySelector('[data-tab="requests-tab"]');
+    if (requestsTab && requestsTab.classList.contains('active')) {
+      // Set interval only if not already set
+      if (!requestStatsRefreshInterval) {
+        debugLog('Setting up request stats auto-refresh');
+        requestStatsRefreshInterval = setInterval(loadRequestStats, 2000);
+      }
+    } else {
+      // Clear interval if tab is not active
+      if (requestStatsRefreshInterval) {
+        debugLog('Clearing request stats auto-refresh');
+        clearInterval(requestStatsRefreshInterval);
+        requestStatsRefreshInterval = null;
+      }
+    }
+  }
+
+  // Check for tab changes to start/stop auto-refresh
+  tabButtons.forEach(button => {
+    button.addEventListener('click', setupRequestStatsRefresh);
+  });
+
+  // Initial setup - in case requests tab is active by default
+  setupRequestStatsRefresh();
 });
