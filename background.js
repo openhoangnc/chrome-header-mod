@@ -18,23 +18,6 @@ function debugLog(message, data) {
 debugLog('Background script initialized');
 debugLog('Debug mode:', isDebugMode);
 
-const rotatingCharacters = ['◐', '◓', '◑', '◒'];
-let rotationIndex = 0;
-
-// Update badge with rotating characters
-function updateBadge() {
-  chrome.action.setBadgeText({ text: rotatingCharacters[rotationIndex] });
-  chrome.action.setBadgeBackgroundColor({ color: '#4688F1' });
-  rotationIndex = (rotationIndex + 1) % rotatingCharacters.length;
-}
-
-// Reset counters when extension starts
-chrome.runtime.onStartup.addListener(() => {
-  debugLog('Extension startup event triggered');
-  modifiedRequestCount = 0;
-  updateBadge();
-});
-
 // Load saved rules from storage when extension starts
 chrome.storage.sync.get(['headerRules'], function (result) {
   debugLog('Loading rules from storage', result);
@@ -53,7 +36,6 @@ chrome.storage.sync.get(['headerRules'], function (result) {
   } else {
     debugLog('No saved rules found in storage');
   }
-  updateBadge(); // Initialize badge
 });
 
 // Listen for messages from the popup
