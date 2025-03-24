@@ -56,7 +56,7 @@ chrome.storage.sync.get(['headerRules', 'ruleMatchCounts'], function (result) {
       ruleMatchCounts = result.ruleMatchCounts;
     }
 
-    updateDynamicRules();
+    updateSessionRules();
   } else {
     debugLog('No saved rules found in storage');
   }
@@ -116,8 +116,8 @@ function addRule(rule) {
     debugLog('Rules saved to storage');
   });
 
-  // Update the dynamic rules
-  updateDynamicRules();
+  // Update the session rules
+  updateSessionRules();
 }
 
 // Update an existing rule
@@ -138,8 +138,8 @@ function updateRule(id, updatedRule) {
       debugLog('Updated rules saved to storage');
     });
 
-    // Update the dynamic rules
-    updateDynamicRules();
+    // Update the session rules
+    updateSessionRules();
   } else {
     debugLog('Rule update failed - ID not found', id);
   }
@@ -161,22 +161,22 @@ function deleteRule(id) {
     debugLog('Rules saved after deletion');
   });
 
-  // Update the dynamic rules
-  updateDynamicRules();
+  // Update the session rules
+  updateSessionRules();
 }
 
 let ruleUpdateCounter = 0;
-// Update the dynamic rules based on current rules
-function updateDynamicRules() {
+// Update the session rules based on current rules
+function updateSessionRules() {
   ruleUpdateCounter++;
-  let dynamicRules = [];
+  let sessionRules = [];
 
-  debugLog('Updating dynamic rules', rules);
+  debugLog('Updating session rules', rules);
 
-  // Get all existing rule IDs to remove them
-  chrome.declarativeNetRequest.getDynamicRules(existingRules => {
+  // Get all existing session rule IDs to remove them
+  chrome.declarativeNetRequest.getSessionRules(existingRules => {
     const existingRuleIds = existingRules.map(rule => rule.id);
-    debugLog('Existing rule count to remove:', existingRuleIds.length);
+    debugLog('Existing session rule count to remove:', existingRuleIds.length);
 
     // Process each enabled rule
     rules.forEach(rule => {
@@ -194,11 +194,10 @@ function updateDynamicRules() {
       debugLog('Processing rule', { rule, urlMatches });
 
       // For each URL rule, create a set of declarativeNetRequest rules
-
-      let dynamicRuleId = rule.id * 1_000_000 + ruleUpdateCounter * 1000;
+      let sessionRuleId = rule.id * 1_000_000 + ruleUpdateCounter * 1000;
       urlMatches.forEach(urlMatch => {
-        dynamicRules.push({
-          id: dynamicRuleId++,
+        sessionRules.push({
+          id: sessionRuleId++,
           priority: 1,
           action: {
             type: "modifyHeaders",
@@ -218,22 +217,21 @@ function updateDynamicRules() {
       });
     });
 
-    debugLog('New dynamic rules to add:', dynamicRules);
+    debugLog('New session rules to add:', sessionRules);
 
     // Remove old rules and add new ones
-    chrome.declarativeNetRequest.updateDynamicRules({
+    chrome.declarativeNetRequest.updateSessionRules({
       removeRuleIds: existingRuleIds,
-      addRules: dynamicRules
+      addRules: sessionRules
     }, () => {
       if (chrome.runtime.lastError) {
-        debugLog('Error updating dynamic rules:', chrome.runtime.lastError);
+        debugLog('Error updating session rules:', chrome.runtime.lastError);
       } else {
-        debugLog('Dynamic rules updated successfully');
+        debugLog('Session rules updated successfully');
       }
     });
   });
 }
-
 
 function saveMatchCounts() {
   chrome.storage.sync.set({ ruleMatchCounts }, () => {
@@ -252,24 +250,24 @@ function debounce(func, delay) {
 const debouncedSaveMatchCounts = debounce(saveMatchCounts, 1000);
 
 // Listen for header modifications
-chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
-  modifiedRequestCount++;
+// chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
+//   modifiedRequestCount++;
 
-  debugLog('Header modification detected', info.rule, rules);
+//   debugLog('Header modification detected', info.rule, rules);
 
-  // Find the rule that matched
-  const matchedRule = rules.find(rule => {
-    return Math.floor(info.rule.ruleId/1_000_000) === rule.id;
-  });
+//   // Find the rule that matched
+//   const matchedRule = rules.find(rule => {
+//     return Math.floor(info.rule.ruleId/1_000_000) === rule.id;
+//   });
 
-  if (matchedRule) {
-    // Increment the match count for this rule
-    ruleMatchCounts[matchedRule.id] = (ruleMatchCounts[matchedRule.id] || 0) + 1;
+//   if (matchedRule) {
+//     // Increment the match count for this rule
+//     ruleMatchCounts[matchedRule.id] = (ruleMatchCounts[matchedRule.id] || 0) + 1;
 
-    debouncedSaveMatchCounts();
+//     debouncedSaveMatchCounts();
     
-    debugLog('Match count updated', { rule: matchedRule, count: ruleMatchCounts[matchedRule.id] });
-  }
+//     debugLog('Match count updated', { rule: matchedRule, count: ruleMatchCounts[matchedRule.id] });
+//   }
 
-  updateBadge();
-});
+//   updateBadge();
+// });

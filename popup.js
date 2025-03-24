@@ -382,10 +382,5 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   // Check connection every 30 seconds
-  const connectionCheckInterval = setInterval(checkBackgroundConnection, 30000);
-
-  // Clean up interval on unload
-  window.addEventListener('unload', () => {
-    clearInterval(connectionCheckInterval);
-  });
+  setInterval(checkBackgroundConnection, 30000);
 });
