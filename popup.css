@@ -270,3 +270,13 @@ button:disabled {
 .toggle-switch input:checked + .toggle-slider:before {
   transform: translateX(16px);
 }
+
+/* Matched rule highlight */
+.rule-matched {
+  background-color: #e6f4ea !important; /* Light green background */
+  border-left: 3px solid #34a853 !important; /* Green accent border */
+}
+
+.rule-matched:hover {
+  background-color: #d7f0d8 !important;
+}

@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // Debug mode flag - will be automatically set by the build script
   const isDebugMode = true;
 
+  // Current tab URL
+  let currentTabUrl = '';
+
   // Debug logging function
   function debugLog(message, data) {
     if (isDebugMode) {
@@ -16,8 +19,57 @@ document.addEventListener('DOMContentLoaded', function () {
   debugLog('Popup loaded - DOM content loaded');
   debugLog('Debug mode:', isDebugMode);
 
-  // Initialize by loading rules immediately after DOM is ready
-  loadRules();
+  // Get the current tab URL
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    if (tabs && tabs.length > 0 && tabs[0].url) {
+      currentTabUrl = tabs[0].url;
+      debugLog('Current tab URL:', currentTabUrl);
+      // Load rules after we have the current URL
+      loadRules();
+    } else {
+      debugLog('Could not get current tab URL');
+      // Load rules anyway
+      loadRules();
+    }
+  });
+
+  // Check if a URL matches a rule pattern
+  function isUrlMatchingPattern(url, pattern) {
+    try {
+      // Convert the URL filter pattern to a regular expression
+      // Replace * with .* to handle wildcards
+      const regexPattern = pattern
+        .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // Escape regex special chars except *
+        .replace(/\*/g, '.*');                 // Convert * to regex wildcard
+
+      const regex = new RegExp(regexPattern);
+      return regex.test(url);
+    } catch (e) {
+      debugLog('Error in URL pattern matching', e);
+      return false;
+    }
+  }
+
+  // Check if a rule matches the current tab URL
+  function checkIfRuleMatches(rule) {
+    if (!currentTabUrl || !rule.enabled) {
+      return false;
+    }
+
+    // Split URL rules by comma and trim whitespace
+    const urlMatches = rule.urlRule.split(',')
+      .map(r => r.trim())
+      .filter(r => r.length > 0);
+
+    // Check each pattern
+    for (const pattern of urlMatches) {
+      if (isUrlMatchingPattern(currentTabUrl, pattern)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   function displayRules(rules) {
     debugLog('Displaying rules', { count: rules ? rules.length : 0 });
@@ -36,10 +88,17 @@ document.addEventListener('DOMContentLoaded', function () {
       const row = document.createElement('tr');
       row.dataset.ruleId = rule.id;
 
+      // Check if this rule matches the current URL
+      const isMatched = checkIfRuleMatches(rule);
+      if (isMatched) {
+        row.classList.add('rule-matched');
+      }
+
       // URL Match cell
       const matchCell = document.createElement('td');
       const matchSpan = document.createElement('span');
-      matchSpan.textContent = rule.urlRule;
+
+      matchSpan.appendChild(document.createTextNode(rule.urlRule));
       matchCell.appendChild(matchSpan);
       row.appendChild(matchCell);
 

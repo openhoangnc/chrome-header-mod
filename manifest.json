@@ -5,7 +5,8 @@
   "description": "Modify HTTP request headers for specific URLs",
   "permissions": [
     "storage",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
