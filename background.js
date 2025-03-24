@@ -4,7 +4,6 @@
 let rules = [];
 let ruleId = 1;
 let modifiedRequestCount = 0;
-let ruleMatchCounts = {}; // Track match counts per rule
 
 // Debug mode flag - will be automatically set by the build script
 const isDebugMode = true;
@@ -33,12 +32,11 @@ function updateBadge() {
 chrome.runtime.onStartup.addListener(() => {
   debugLog('Extension startup event triggered');
   modifiedRequestCount = 0;
-  ruleMatchCounts = {};
   updateBadge();
 });
 
 // Load saved rules from storage when extension starts
-chrome.storage.sync.get(['headerRules', 'ruleMatchCounts'], function (result) {
+chrome.storage.sync.get(['headerRules'], function (result) {
   debugLog('Loading rules from storage', result);
   if (result.headerRules) {
     rules = result.headerRules;
@@ -50,11 +48,6 @@ chrome.storage.sync.get(['headerRules', 'ruleMatchCounts'], function (result) {
         ruleId = rule.id + 1;
       }
     });
-
-    // Load saved match counts if they exist
-    if (result.ruleMatchCounts) {
-      ruleMatchCounts = result.ruleMatchCounts;
-    }
 
     updateSessionRules();
   } else {
@@ -77,12 +70,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ success: true });
   } else if (message.action === 'getRules') {
     debugLog('Getting rules, current count:', rules.length);
-    // Include match counts with rules
-    const rulesWithCounts = rules.map(rule => ({
-      ...rule,
-      matchCount: ruleMatchCounts[rule.id] || 0
-    }));
-    sendResponse({ rules: rulesWithCounts });
+    sendResponse({ rules: rules });
   } else if (message.action === 'deleteRule') {
     debugLog('Deleting rule', message.ruleId);
     deleteRule(message.ruleId);
@@ -149,10 +137,6 @@ function updateRule(id, updatedRule) {
 function deleteRule(id) {
   const previousCount = rules.length;
   rules = rules.filter(rule => rule.id !== id);
-
-  // Clean up match count for deleted rule
-  delete ruleMatchCounts[id];
-  chrome.storage.sync.set({ ruleMatchCounts });
 
   debugLog('Rule deleted', { id, previousCount, newCount: rules.length });
 
@@ -233,41 +217,5 @@ function updateSessionRules() {
   });
 }
 
-function saveMatchCounts() {
-  chrome.storage.sync.set({ ruleMatchCounts }, () => {
-    debugLog('Match counts saved to storage');
-  });
-}
-
-function debounce(func, delay) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), delay);
-  };
-}
-
-const debouncedSaveMatchCounts = debounce(saveMatchCounts, 1000);
-
-// Listen for header modifications
-// chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
-//   modifiedRequestCount++;
-
-//   debugLog('Header modification detected', info.rule, rules);
-
-//   // Find the rule that matched
-//   const matchedRule = rules.find(rule => {
-//     return Math.floor(info.rule.ruleId/1_000_000) === rule.id;
-//   });
-
-//   if (matchedRule) {
-//     // Increment the match count for this rule
-//     ruleMatchCounts[matchedRule.id] = (ruleMatchCounts[matchedRule.id] || 0) + 1;
-
-//     debouncedSaveMatchCounts();
-    
-//     debugLog('Match count updated', { rule: matchedRule, count: ruleMatchCounts[matchedRule.id] });
-//   }
-
-//   updateBadge();
-// });
+// The onRuleMatchedDebug listener and related functionality has been removed
+// as per request since it's not being used

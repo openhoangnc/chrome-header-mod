@@ -6,7 +6,6 @@ A Chrome extension that allows you to modify HTTP request headers for specific U
 
 - Add, modify, or remove HTTP headers for specific URLs
 - Support for multiple header modifications per URL pattern
-- Real-time header modification tracking with badge counter
 - User-friendly interface with instant feedback
 - Persistent storage of header rules
 - Support for URL patterns and wildcards
@@ -34,7 +33,6 @@ A Chrome extension that allows you to modify HTTP request headers for specific U
    - Header Name
    - Header Value
 3. Click "Save" to activate the rule
-4. The extension badge will show the count of modified requests
 
 ### URL Pattern Examples
 
