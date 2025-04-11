@@ -40,6 +40,31 @@ A Chrome extension that allows you to modify HTTP request headers for specific U
 - `*://api.example.com/*` - Match specific subdomain
 - `*://*/*` - Match all URLs (use with caution)
 
+## Icon Generation
+
+This project uses SVG as the source for all extension icons. The icons are generated using svgexport.
+
+### How to generate icons
+
+1. Place your SVG source file at the root of the project as `icon.svg`
+2. Run the icon generation script:
+
+   ```
+   npm run generate-icons
+   ```
+
+This will create PNG files of sizes 16x16, 32x32, 48x48, and 128x128 in the icons directory, which are used by the Chrome extension.
+
+## Building the Extension
+
+To package the extension for distribution:
+
+```
+npm run build
+```
+
+This will create a zip file containing all necessary files for the Chrome extension.
+
 ## Development
 
 ### Prerequisites
@@ -49,9 +74,6 @@ A Chrome extension that allows you to modify HTTP request headers for specific U
 ### Setup
 
 ```bash
-# Install dependencies
-npm install
-
 # Generate icons
 npm run generate-icons
 
@@ -71,6 +93,7 @@ npm run package
 ### Debug Mode
 
 The extension includes a debug mode that can be toggled on or off:
+
 - `npm run debug:on` - Enables additional logging and debug features
 - `npm run debug:off` - Disables debug features for production use
 - `npm run build` - Convenience script that disables debug mode and packages the extension
@@ -80,6 +103,7 @@ The extension includes a debug mode that can be toggled on or off:
 - `manifest.json` - Extension configuration
 - `background.js` - Background service worker for header modifications
 - `popup.html/js/css` - Extension popup interface
+- `icon.svg` - Extension icon source file
 - `icons/` - Extension icons in various sizes
 
 ## Contributing
@@ -97,6 +121,7 @@ This project is open source and available under the MIT License.
 ## Privacy
 
 This extension:
+
 - Does not collect any personal information
 - Only modifies headers for user-specified URLs
 - Stores all rules locally on your device

@@ -2,14 +2,17 @@
   "name": "chrome-header-mod",
   "version": "1.0.0",
   "scripts": {
-    "generate-icons": "node tools/generate-icons.js",
+    "mkdir-icons": "mkdir -p icons",
+    "export-icon-16": "npx svgexport icon.svg icons/icon16.png 16:16",
+    "export-icon-32": "npx svgexport icon.svg icons/icon32.png 32:32",
+    "export-icon-48": "npx svgexport icon.svg icons/icon48.png 48:48",
+    "export-icon-128": "npx svgexport icon.svg icons/icon128.png 128:128",
+    "generate-icons": "npm run mkdir-icons && npm run export-icon-16 && npm run export-icon-32 && npm run export-icon-48 && npm run export-icon-128",
     "debug:on": "node tools/set-debug-mode.js",
     "debug:off": "node tools/set-debug-mode.js production",
     "unpackage": "rm -rf build && unzip chrome-header-mod.zip -d build",
     "package": "rm -f chrome-header-mod.zip && zip -r chrome-header-mod.zip manifest.json background.js popup.html popup.css popup.js icons/icon16.png icons/icon48.png icons/icon128.png",
     "build": "npm run debug:off && npm run package && npm run debug:on && npm run unpackage"
   },
-  "dependencies": {
-    "sharp": "^0.33.5"
-  }
+  "dependencies": {}
 }
